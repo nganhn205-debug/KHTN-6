@@ -272,12 +272,20 @@ export default function Landing() {
                 </Button>
               </Link>
 
-              <Link href="/setup">
-                <Button className="rounded-full px-6">
-                  Bắt đầu
-                </Button>
-              </Link>
+              <Button
+  className="rounded-full px-6"
+  onClick={() => {
+    const student = localStorage.getItem("student");
 
+    if (student) {
+      window.location.href = "/dashboard";
+    } else {
+      window.location.href = "/setup";
+    }
+  }}
+>
+  Bắt đầu
+</Button>
             </div>
           </header>
 
@@ -361,15 +369,21 @@ export default function Landing() {
                       Bài học của em
                     </h3>
 
-                    <Link
-                      href="/setup"
-                      className="text-blue-600 font-semibold flex gap-1"
-                    >
-                      Bắt đầu học
+                    <button
+  onClick={() => {
+    const student = localStorage.getItem("student");
 
-                      <ArrowRight />
-                    </Link>
-
+    if (student) {
+      window.location.href = "/dashboard";
+    } else {
+      window.location.href = "/setup";
+    }
+  }}
+  className="text-blue-600 font-semibold flex gap-1"
+>
+  Bắt đầu học
+  <ArrowRight />
+</button>
                   </div>
 
                   <div className="grid md:grid-cols-4 gap-4">
