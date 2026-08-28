@@ -1,244 +1,786 @@
+
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Home, Send, MessageCircle, BookOpen, ChevronRight } from 'lucide-react';
 
-const lessonContent: Record<number, {
-title: string;
-content: JSX.Element;
-objectives: string[];
-}> = {
-1: {
-title: 'Bài 9. Sự đa dạng của chất',
-content: ( <div className="space-y-6"> <p>Chất có ở khắp mọi nơi xung quanh chúng ta.</p> <p>Mỗi chất có những tính chất riêng giúp chúng ta nhận biết và phân biệt chúng.</p> </div>
-),
-objectives: [
-'Nhận biết được sự đa dạng của chất',
-'Nêu được một số tính chất của chất',
-'Lấy được ví dụ về các chất trong đời sống'
-],
-},
+import {
+  Home,
+  Send,
+  MessageCircle,
+  BookOpen,
+  ChevronRight,
+  ChevronLeft,
+  Target,
+  Video,
+  Sparkles,
+} from 'lucide-react';
 
-2: {
-title: 'Bài 10. Các thể của chất và sự chuyển thể',
-content: ( <div className="space-y-6"> <p>Chất tồn tại ở ba thể cơ bản: rắn, lỏng và khí.</p> <p>Chất có thể chuyển từ thể này sang thể khác.</p> </div>
-),
-objectives: [
-'Phân biệt các thể của chất',
-'Mô tả được sự nóng chảy và đông đặc',
-'Mô tả được sự bay hơi và ngưng tụ'
-],
-},
-
-3: {
-title: 'Bài 11. Oxygen và Không khí',
-content: ( <div className="space-y-6"> <p>Oxygen là chất khí cần thiết cho sự hô hấp và sự cháy.</p> <p>Không khí là hỗn hợp nhiều chất khí khác nhau.</p> </div>
-),
-objectives: [
-'Nêu được tính chất của oxygen',
-'Trình bày vai trò của oxygen',
-'Nêu được thành phần chính của không khí'
-],
-},
-
-4: {
-title: 'Bài 12. Một số vật liệu',
-content: ( <div className="space-y-6"> <p>Vật liệu được sử dụng để chế tạo đồ dùng và công trình.</p> </div>
-),
-objectives: [
-'Nhận biết một số vật liệu phổ biến',
-'Nêu được ứng dụng của vật liệu'
-],
-},
-
-5: {
-title: 'Bài 13. Một số nhiên liệu',
-content: ( <div className="space-y-6"> <p>Nhiên liệu cung cấp năng lượng cho đời sống và sản xuất.</p> </div>
-),
-objectives: [
-'Kể tên một số nhiên liệu',
-'Nêu được vai trò của nhiên liệu'
-],
-},
-
-6: {
-title: 'Bài 14. Một số lương thực - thực phẩm',
-content: ( <div className="space-y-6"> <p>Lương thực và thực phẩm cung cấp chất dinh dưỡng cho cơ thể.</p> </div>
-),
-objectives: [
-'Phân biệt lương thực và thực phẩm',
-'Nêu được vai trò của dinh dưỡng'
-],
-},
+type Message = {
+  role: 'user' | 'assistant';
+  content: string;
 };
 
+type Lesson = {
+  title: string;
+  subtitle: string;
+  image: string;
+  content: React.ReactNode;
+  objectives: string[];
+};
 
-export default function LessonPage({ params }: { params: { id: string } }) {
-  const lessonId = parseInt(params.id);
-  const lesson = lessonContent[lessonId as keyof typeof lessonContent] || lessonContent[1];
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+/* =========================================================
+   NỘI DUNG CÁC BÀI HỌC
+   ID 1 = Bài 9
+   ID 2 = Bài 10
+   ========================================================= */
+
+const lessonContent: Record<number, Lesson> = {
+  /* =======================================================
+     BÀI 9
+     ======================================================= */
+
+  1: {
+    title: 'Bài 9. Sự đa dạng của chất',
+    subtitle: 'Tìm hiểu vật thể, chất và tính chất của chất',
+    image: '/lessons/bai9.png',
+
+    content: (
+      <div className="space-y-4 text-slate-700 leading-7">
+        <p>
+          Chất có ở khắp mọi nơi xung quanh chúng ta. Mỗi vật thể có thể được
+          tạo nên từ một hoặc nhiều chất khác nhau.
+        </p>
+
+        <p>
+          Mỗi chất có những tính chất riêng như màu sắc, mùi, vị, thể, tính
+          tan, khả năng cháy... giúp con người nhận biết và sử dụng chất phù
+          hợp.
+        </p>
+      </div>
+    ),
+
+    objectives: [
+      'Nhận biết được sự đa dạng của chất trong đời sống.',
+      'Nêu được một số tính chất của chất.',
+      'Lấy được ví dụ về vật thể và chất.',
+    ],
+  },
+
+  /* =======================================================
+     BÀI 10
+     ======================================================= */
+
+  2: {
+    title: 'Bài 10. Các thể của chất và sự chuyển thể',
+    subtitle: 'Tìm hiểu chất rắn, chất lỏng, chất khí và sự chuyển thể',
+    image: '/lessons/bai10.png',
+
+    content: (
+      <div className="space-y-4 text-slate-700 leading-7">
+        <p>
+          Chất có thể tồn tại ở ba thể cơ bản: thể rắn, thể lỏng và thể khí.
+          Mỗi thể có những đặc điểm riêng về hình dạng và thể tích.
+        </p>
+
+        <p>
+          Chất rắn có hình dạng và thể tích xác định. Chất lỏng có thể tích
+          xác định nhưng không có hình dạng xác định, nó nhận hình dạng của
+          vật chứa.
+        </p>
+
+        <p>
+          Chất khí không có hình dạng và thể tích xác định, có thể lan tỏa và
+          chiếm đầy vật chứa.
+        </p>
+
+        <p>
+          Khi điều kiện thay đổi, chất có thể chuyển từ thể này sang thể khác.
+          Một số sự chuyển thể thường gặp là nóng chảy, đông đặc, bay hơi,
+          ngưng tụ và sôi.
+        </p>
+      </div>
+    ),
+
+    objectives: [
+      'Nêu được đặc điểm của chất ở thể rắn, thể lỏng và thể khí.',
+      'Phân biệt được chất rắn, chất lỏng và chất khí.',
+      'Nêu được một số sự chuyển thể của chất.',
+      'Lấy được ví dụ về sự chuyển thể trong đời sống.',
+    ],
+  },
+};
+
+/* =========================================================
+   TRANG BÀI HỌC
+   ========================================================= */
+
+export default function LessonPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  /* =======================================================
+     1. LẤY ID BÀI HỌC
+     ======================================================= */
+
+  const [lessonId, setLessonId] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    params.then((value) => {
+      if (!active) return;
+
+      const parsedId = Number.parseInt(value.id, 10);
+
+      if (Number.isNaN(parsedId)) {
+        setLessonId(1);
+      } else {
+        setLessonId(parsedId);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [params]);
+
+  /* =======================================================
+     2. TRẠNG THÁI NYNY AI
+     ======================================================= */
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  /* =======================================================
+     3. TỰ CUỘN CHAT
+     ======================================================= */
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop =
+        scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  /* =======================================================
+     4. GỬI CÂU HỎI CHO NYNY AI
+     ======================================================= */
 
-    const userMessage = { role: 'user' as const, content: input };
-    setMessages((prev) => [...prev, userMessage]);
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+
+    const question = input.trim();
+
+    if (!question) return;
+
+    const userMessage: Message = {
+      role: 'user',
+      content: question,
+    };
+
+    const newMessages = [...messages, userMessage];
+
+    setMessages(newMessages);
     setInput('');
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = [
-        'Great question! Physical properties are characteristics of matter that can be observed or measured without changing the substance.',
-        'Density is how tightly packed matter is. It\'s calculated by dividing mass by volume.',
-        'Solubility refers to how well a substance dissolves in another substance, like sugar dissolving in water.',
-        'The main states of matter are solid, liquid, and gas. Each has different properties.',
-      ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setMessages((prev) => [...prev, { role: 'assistant', content: randomResponse }]);
-    }, 500);
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          messages: newMessages,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('API chat error');
+      }
+
+      const text = await res.text();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            text ||
+            'NyNy chưa trả lời được câu hỏi này. Em thử hỏi lại nhé.',
+        },
+      ]);
+    } catch (error) {
+      console.error('Chat error:', error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            'Đã có lỗi xảy ra khi kết nối với NyNy. Em hãy thử hỏi lại nhé.',
+        },
+      ]);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-white border-b border-border sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+  /* =======================================================
+     5. ĐANG CHỜ ID
+     ======================================================= */
+
+  if (lessonId === null) {
+    return (
+      <div className="min-h-screen bg-[#F5FAFF] flex items-center justify-center">
+        <div className="text-center">
+
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+
+          <p className="text-slate-600">
+            Đang tải bài học...
+          </p>
+
+        </div>
+      </div>
+    );
+  }
+
+  /* =======================================================
+     6. LẤY NỘI DUNG BÀI HỌC
+     ======================================================= */
+
+  const lesson = lessonContent[lessonId];
+
+  if (!lesson) {
+    return (
+      <div className="min-h-screen bg-[#F5FAFF] flex items-center justify-center px-4">
+
+        <Card className="max-w-md w-full rounded-3xl">
+
+          <CardHeader>
+            <CardTitle className="text-center">
+              Không tìm thấy bài học
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="text-center">
+
+            <p className="text-slate-600 mb-6">
+              Bài học {lessonId} chưa được cấu hình nội dung.
+            </p>
+
             <Link href="/course/1">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Home className="w-4 h-4" />
-                Back
+              <Button className="rounded-full">
+                <Home className="w-4 h-4 mr-2" />
+                Quay lại danh sách bài học
               </Button>
             </Link>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">{lesson.title}</h1>
-              <p className="text-xs text-muted-foreground">Lesson {lessonId}</p>
-            </div>
-          </div>
+
+          </CardContent>
+
+        </Card>
+
+      </div>
+    );
+  }
+
+  /* =======================================================
+     7. ĐƯỜNG DẪN E-LEARNING
+
+     ID 1 → Bài 9
+     /elearning/bai9/index.html
+
+     ID 2 → Bài 10
+     /elearning/bai10/index.html
+     ======================================================= */
+
+  const elearningUrl =
+    `/elearning/bai${lessonId + 8}/index.html`;
+
+  /* =======================================================
+     8. GIAO DIỆN
+     ======================================================= */
+
+  return (
+    <div className="min-h-screen bg-[#F5FAFF]">
+
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
+
+      <header className="bg-white/90 backdrop-blur border-b sticky top-0 z-40">
+
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+
+          <Link href="/course/1">
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 rounded-full"
+            >
+              <Home className="w-4 h-4" />
+
+              Danh sách bài học
+            </Button>
+
+          </Link>
+
+          <Link href={`/quiz/${lessonId}`}>
+
+            <Button className="rounded-full gap-2">
+
+              Làm Quiz
+
+              <ChevronRight className="w-4 h-4" />
+
+            </Button>
+
+          </Link>
+
         </div>
+
       </header>
 
-      {/* Main Content */}
+      {/* =====================================================
+          MAIN
+          ===================================================== */}
+
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Lesson Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Lesson Body */}
-            <Card className="border-0 shadow-sm">
-              <CardContent className="pt-8">
-                {lesson.content}
-              </CardContent>
-            </Card>
 
-            {/* Learning Objectives */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Learning Objectives
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {lesson.objectives.map((obj, idx) => (
-                    <li key={idx} className="flex gap-3">
-                      <span className="text-primary font-bold">✓</span>
-                      <span className="text-foreground">{obj}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+        {/* ===================================================
+            HERO
+            =================================================== */}
 
-            {/* Navigation */}
-            <div className="flex gap-4 justify-between">
-              <Link href="/course/1">
-                <Button variant="outline">Previous Lesson</Button>
-              </Link>
-              <Link href={`/quiz/${lessonId}`}>
-                <Button className="gap-2">
-                  Next: Take Quiz <ChevronRight className="w-4 h-4" />
-                </Button>
-              </Link>
+        <Card className="rounded-3xl border-0 bg-gradient-to-r from-blue-500 to-sky-400 text-white shadow-lg mb-8 overflow-hidden">
+
+          <CardContent className="p-8 grid md:grid-cols-[1fr_260px] gap-6 items-center">
+
+            <div>
+
+              <p className="font-semibold opacity-90">
+                KHTN Learn cùng NyNy
+              </p>
+
+              <h1 className="text-4xl font-extrabold mt-2">
+                {lesson.title}
+              </h1>
+
+              <p className="mt-3 text-lg opacity-90">
+                {lesson.subtitle}
+              </p>
+
+              <div className="mt-6 flex gap-3 flex-wrap">
+
+                <span className="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">
+                  🎥 E-learning
+                </span>
+
+                <span className="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">
+                  🤖 NyNy AI
+                </span>
+
+                <span className="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">
+                  📝 Quiz
+                </span>
+
+              </div>
+
             </div>
-          </div>
 
-          {/* AI Chatbot Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="h-screen lg:h-[600px] flex flex-col fixed bottom-0 right-4 w-96 lg:relative lg:bottom-auto lg:right-auto lg:w-full shadow-lg">
-              <CardHeader className="border-b border-border">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <MessageCircle className="w-5 h-5 text-primary" />
-                  AI Tutor
+            <div className="bg-white/20 rounded-3xl p-4 flex justify-center">
+
+              <img
+                src={lesson.image}
+                alt={lesson.title}
+                className="h-44 object-contain"
+              />
+
+            </div>
+
+          </CardContent>
+
+        </Card>
+
+        {/* ===================================================
+            CONTENT + AI
+            =================================================== */}
+
+        <div className="grid lg:grid-cols-[1fr_360px] gap-8">
+
+          {/* =================================================
+              LEFT
+              ================================================= */}
+
+          <section className="space-y-8">
+
+            {/* ===============================================
+                MỤC TIÊU
+                =============================================== */}
+
+            <Card className="rounded-3xl border-0 shadow-sm">
+
+              <CardHeader>
+
+                <CardTitle className="flex items-center gap-2">
+
+                  <Target className="w-5 h-5 text-blue-500" />
+
+                  Mục tiêu học tập
+
                 </CardTitle>
+
               </CardHeader>
 
-              {/* Chat Messages */}
-              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-                <div className="space-y-4">
-                  {messages.length === 0 && (
-                    <div className="text-center py-8">
-                      <MessageCircle className="w-12 h-12 text-muted opacity-30 mx-auto mb-3" />
-                      <p className="text-muted-foreground text-sm">Ask me anything about this lesson!</p>
-                      <div className="mt-4 space-y-2 text-xs">
-                        <p className="text-muted-foreground">Example questions:</p>
-                        <p className="text-primary hover:underline cursor-pointer">• What are physical properties?</p>
-                        <p className="text-primary hover:underline cursor-pointer">• How is density measured?</p>
-                        <p className="text-primary hover:underline cursor-pointer">• Give me real-world examples</p>
-                      </div>
-                    </div>
-                  )}
-                  {messages.map((msg, idx) => (
-                    <div
+              <CardContent>
+
+                <ul className="space-y-3">
+
+                  {lesson.objectives.map((obj, idx) => (
+
+                    <li
                       key={idx}
-                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      className="flex gap-3"
                     >
+
+                      <span className="w-7 h-7 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold flex-shrink-0">
+                        ✓
+                      </span>
+
+                      <span className="text-slate-700">
+                        {obj}
+                      </span>
+
+                    </li>
+
+                  ))}
+
+                </ul>
+
+              </CardContent>
+
+            </Card>
+
+            {/* ===============================================
+                E-LEARNING
+                =============================================== */}
+
+            <Card className="rounded-3xl border-0 shadow-sm overflow-hidden">
+
+              <CardHeader>
+
+                <CardTitle className="flex items-center gap-2">
+
+                  <Video className="w-5 h-5 text-blue-500" />
+
+                  Video bài giảng E-learning
+
+                </CardTitle>
+
+              </CardHeader>
+
+              <CardContent>
+
+                <div className="w-full overflow-hidden rounded-3xl border bg-white">
+
+                  <iframe
+                    src={elearningUrl}
+                    width="100%"
+                    height="700"
+                    className="w-full border-0"
+                    title={`Bài giảng E-learning - ${lesson.title}`}
+                    allowFullScreen
+                  />
+
+                </div>
+
+              </CardContent>
+
+            </Card>
+
+            {/* ===============================================
+                NỘI DUNG TRỌNG TÂM
+                =============================================== */}
+
+            <Card className="rounded-3xl border-0 shadow-sm">
+
+              <CardHeader>
+
+                <CardTitle className="flex items-center gap-2">
+
+                  <BookOpen className="w-5 h-5 text-blue-500" />
+
+                  Nội dung trọng tâm
+
+                </CardTitle>
+
+              </CardHeader>
+
+              <CardContent>
+
+                {lesson.content}
+
+              </CardContent>
+
+            </Card>
+
+            {/* ===============================================
+                GỢI Ý NYNY
+                =============================================== */}
+
+            <Card className="rounded-3xl border-0 bg-blue-50 shadow-sm">
+
+              <CardContent className="p-6 flex gap-4 items-start">
+
+                <Sparkles className="w-6 h-6 text-yellow-500 mt-1 flex-shrink-0" />
+
+                <div>
+
+                  <h3 className="font-bold text-lg">
+                    Gợi ý từ NyNy
+                  </h3>
+
+                  <p className="text-slate-600 mt-1">
+                    Sau khi xem bài giảng, em hãy làm Quiz để kiểm tra
+                    mức độ hiểu bài. Đạt từ 70% trở lên thì bài học sẽ
+                    được tính hoàn thành.
+                  </p>
+
+                </div>
+
+              </CardContent>
+
+            </Card>
+
+            {/* ===============================================
+                NAVIGATION
+                =============================================== */}
+
+            <div className="flex justify-between gap-4">
+
+              <Link href="/course/1">
+
+                <Button
+                  variant="outline"
+                  className="rounded-full gap-2"
+                >
+
+                  <ChevronLeft className="w-4 h-4" />
+
+                  Quay lại
+
+                </Button>
+
+              </Link>
+
+              <Link href={`/quiz/${lessonId}`}>
+
+                <Button className="rounded-full gap-2">
+
+                  Làm bài kiểm tra
+
+                  <ChevronRight className="w-4 h-4" />
+
+                </Button>
+
+              </Link>
+
+            </div>
+
+          </section>
+
+          {/* =================================================
+              RIGHT - NYNY AI
+              ================================================= */}
+
+          <aside>
+
+            <Card className="rounded-3xl border-0 shadow-lg sticky top-24 overflow-hidden">
+
+              <CardHeader className="bg-blue-500 text-white">
+
+                <CardTitle className="flex items-center gap-2 text-lg">
+
+                  <MessageCircle className="w-5 h-5" />
+
+                  NyNy AI
+
+                </CardTitle>
+
+                <p className="text-sm opacity-90">
+                  Hỏi NyNy nếu em chưa hiểu bài nhé.
+                </p>
+
+              </CardHeader>
+
+              {/* NYNY INTRO */}
+
+              <div className="p-4 bg-blue-50 flex items-center gap-3">
+
+                <img
+                  src="/mascot/nyny.png"
+                  alt="NyNy"
+                  className="w-16 h-16 object-contain bg-white rounded-2xl"
+                />
+
+                <div className="bg-white rounded-2xl p-3 text-sm text-slate-600">
+
+                  Xin chào! Mình là NyNy.
+                  Em muốn hỏi gì về bài học này?
+
+                </div>
+
+              </div>
+
+              {/* CHAT */}
+
+              <ScrollArea
+                className="h-[360px] p-4"
+                ref={scrollRef}
+              >
+
+                <div className="space-y-4">
+
+                  {/* GỢI Ý */}
+
+                  {messages.length === 0 && (
+
+                    <div className="text-center py-6">
+
+                      <p className="text-sm text-slate-500">
+                        Câu hỏi gợi ý:
+                      </p>
+
+                      <div className="mt-3 space-y-2 text-sm">
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setInput(
+                              lessonId === 2
+                                ? 'Ba thể của chất là gì?'
+                                : 'Chất là gì?'
+                            )
+                          }
+                          className="block w-full bg-blue-50 text-blue-600 rounded-2xl px-3 py-2 hover:bg-blue-100 transition"
+                        >
+                          {lessonId === 2
+                            ? 'Ba thể của chất là gì?'
+                            : 'Chất là gì?'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setInput(
+                              lessonId === 2
+                                ? 'Sự chuyển thể là gì?'
+                                : 'Tính chất của chất là gì?'
+                            )
+                          }
+                          className="block w-full bg-blue-50 text-blue-600 rounded-2xl px-3 py-2 hover:bg-blue-100 transition"
+                        >
+                          {lessonId === 2
+                            ? 'Sự chuyển thể là gì?'
+                            : 'Tính chất của chất là gì?'}
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  )}
+
+                  {/* TIN NHẮN */}
+
+                  {messages.map((msg, idx) => (
+
+                    <div
+                      key={`${msg.role}-${idx}`}
+                      className={`flex ${
+                        msg.role === 'user'
+                          ? 'justify-end'
+                          : 'justify-start'
+                      }`}
+                    >
+
                       <div
-                        className={`max-w-xs px-4 py-2 rounded-lg ${
+                        className={`max-w-xs px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
                           msg.role === 'user'
-                            ? 'bg-primary text-primary-foreground rounded-br-none'
-                            : 'bg-muted text-foreground rounded-bl-none'
+                            ? 'bg-blue-500 text-white rounded-br-none'
+                            : 'bg-slate-100 text-slate-700 rounded-bl-none'
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+
+                        {msg.content}
+
                       </div>
+
                     </div>
+
                   ))}
+
                 </div>
+
               </ScrollArea>
 
-              {/* Input */}
-              <div className="border-t border-border p-4 bg-white rounded-b-lg">
-                <form onSubmit={handleSubmit} className="flex gap-2">
+              {/* INPUT */}
+
+              <div className="border-t p-4 bg-white">
+
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex gap-2"
+                >
+
                   <Input
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask a question..."
-                    className="flex-1 text-sm"
+                    onChange={(e) =>
+                      setInput(e.target.value)
+                    }
+                    placeholder="Nhập câu hỏi cho NyNy..."
+                    className="flex-1 rounded-full"
                   />
-                  <Button type="submit" size="icon" className="flex-shrink-0">
+
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="rounded-full"
+                    disabled={!input.trim()}
+                  >
+
                     <Send className="w-4 h-4" />
+
                   </Button>
+
                 </form>
+
               </div>
+
             </Card>
-          </div>
+
+          </aside>
+
         </div>
+
       </main>
+
     </div>
   );
 }

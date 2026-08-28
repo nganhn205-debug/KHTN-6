@@ -1,23 +1,27 @@
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { createAnswer } from "@/lib/knowledge";
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const systemPrompt = `You are an expert Grade 6 Science tutor specializing in teaching about matter and its properties. 
-You help students understand:
-- Physical properties of matter (color, shape, size, density, solubility)
-- Physical changes (melting, freezing, boiling, evaporation, condensation, dissolving)
-- Chemical changes (burning, rusting, rotting, combining to form new substances)
+    const lastMessage =
+      messages[messages.length - 1]?.content || "";
 
-Keep explanations simple and engaging for 12-year-old students. Use analogies and real-world examples. 
-Ask clarifying questions if needed. Provide step-by-step explanations.`;
+    const result = createAnswer(lastMessage);
 
-  const result = streamText({
-    model: openai('gpt-4o-mini'),
-    system: systemPrompt,
-    messages,
-  });
+    return new Response(result.answer, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
+  } catch (error) {
+    console.error(error);
 
-  return result.toDataStreamResponse();
+    return new Response(
+      "Xin lỗi, đã xảy ra lỗi.",
+      {
+        status: 500,
+      }
+    );
+  }
 }
